@@ -1,6 +1,6 @@
 ﻿Function Enable-BitShift
 {
-    # Big thanks to Matt Graeber for showing how it is possible to assembly .NET methods with CIL opcodes
+    # Big thanks to Matt Graeber for showing that it is possible to assemble .NET methods with CIL opcodes
     # and for the overall fueling of the fire that is my PowerShell obsession
 
     $Domain          = [AppDomain]::CurrentDomain
