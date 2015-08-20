@@ -5,7 +5,7 @@ PowerShell bit shift support using CIL opcodes
 After calling the function Enable-BitShift, a Global variable called Bitwise is created, which contains the Emitted RuntimeType
 
 Usage:
-
+```PowerShell
 PS C:\> Enable-BitShift
 PS C:\> $Bitwise
 
@@ -18,3 +18,4 @@ PS C:\> $Bitwise::Lsh(32,2)
 128
 PS C:\> $Bitwise::Rsh(128,2)
 32
+```
