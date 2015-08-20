@@ -3,29 +3,27 @@
     # Big thanks to Matt Graeber for showing how it is possible to assembly .NET methods with CIL opcodes
     # and for the overall fueling of the fire that is my PowerShell obsession
 
-    $RshMethodInfo = New-Object Reflection.Emit.DynamicMethod('Rsh', [Int32], @([Int32], [UInt32]))
-    $LshMethodInfo = New-Object Reflection.Emit.DynamicMethod('Lsh', [Int32], @([Int32], [UInt32]))
-    $Delegate      = [Func``3[UInt32, Int32, UInt32]]
+    $Domain          = [AppDomain]::CurrentDomain
+    $DynAssembly     = New-Object System.Reflection.AssemblyName -ArgumentList @('PoShBitwiseAssembly')
+    $AssemblyBuilder = $Domain.DefineDynamicAssembly($DynAssembly, [System.Reflection.Emit.AssemblyBuilderAccess]::Run)
+    $ModuleBuilder   = $AssemblyBuilder.DefineDynamicModule('PoShBitwiseModule', $False)
+    $TypeBuilder     = $ModuleBuilder.DefineType('PoShBitwiseBuilder', [System.Reflection.TypeAttributes]'Public, Sealed, AnsiClass, AutoClass',[Object])
 
-    # Rsh
-    $ILGen = $RshMethodInfo.GetILGenerator(2)
-    $ILGen.Emit([Reflection.Emit.OpCodes]::Ldarg_0)
-    $ILGen.Emit([Reflection.Emit.OpCodes]::Ldarg_1)
-    $ILGen.Emit([Reflection.Emit.OpCodes]::Shr)
-    $ILGen.Emit([Reflection.Emit.OpCodes]::Ret)
-    $Rsh = $RshMethodInfo.CreateDelegate($Delegate)
-
-
-    # Lsh
-    $ILGen = $LshMethodInfo.GetILGenerator(2)
+    $MethodBuilder   = $TypeBuilder.DefineMethod('Lsh', [System.Reflection.MethodAttributes]'Public,Static,HideBySig,NewSlot', [Int32], [type[]]([Int32],[UInt32]))
+    $MethodBuilder.SetImplementationFlags([System.Reflection.MethodImplAttributes]'Managed')
+    $ILGen = $MethodBuilder.GetILGenerator(2)
     $ILGen.Emit([Reflection.Emit.OpCodes]::Ldarg_0)
     $ILGen.Emit([Reflection.Emit.OpCodes]::Ldarg_1)
     $ILGen.Emit([Reflection.Emit.OpCodes]::Shl)
     $ILGen.Emit([Reflection.Emit.OpCodes]::Ret)
-    $Lsh = $LshMethodInfo.CreateDelegate($Delegate)
 
-    New-Object -TypeName PSCustomObject -Property @{
-        Lsh = $Lsh.Invoke
-        Rsh = $Rsh.Invoke
-    }
+    $MethodBuilder   = $TypeBuilder.DefineMethod('Rsh', [System.Reflection.MethodAttributes]'Public,Static,HideBySig,NewSlot', [Int32], [type[]]([Int32],[UInt32]))
+    $MethodBuilder.SetImplementationFlags([System.Reflection.MethodImplAttributes]'Managed')
+    $ILGen = $MethodBuilder.GetILGenerator(2)
+    $ILGen.Emit([Reflection.Emit.OpCodes]::Ldarg_0)
+    $ILGen.Emit([Reflection.Emit.OpCodes]::Ldarg_1)
+    $ILGen.Emit([Reflection.Emit.OpCodes]::Shr)
+    $ILGen.Emit([Reflection.Emit.OpCodes]::Ret)
+
+    $Global:Bitwise = $TypeBuilder.CreateType()
 }
